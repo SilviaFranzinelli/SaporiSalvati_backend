@@ -10,12 +10,16 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
-    @Autowired
-    private static UserRepository userRepository;
 
-    public static User getUserByUsername(String username) {
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    public User getUserByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() -> new UsernameNotFoundException("Utente non trovato"));
     }
 
     @Transactional
@@ -23,9 +27,6 @@ public class UserService {
         User user = getUserByUsername(username);
         userRepository.delete(user);
     }
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Transactional
     public User registerUser(User user) {
@@ -35,5 +36,10 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         return userRepository.save(user);
+    }
+
+
+    public void save(User user) {
+        userRepository.save(user);
     }
 }

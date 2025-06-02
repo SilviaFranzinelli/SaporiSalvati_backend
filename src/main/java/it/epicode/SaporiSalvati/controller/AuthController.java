@@ -1,63 +1,82 @@
 package it.epicode.SaporiSalvati.controller;
 
+import it.epicode.SaporiSalvati.model.JwtResponse;
 import it.epicode.SaporiSalvati.model.JwtUtil;
-import it.epicode.SaporiSalvati.model.User;
-import it.epicode.SaporiSalvati.repository.UserRepository;
-import it.epicode.SaporiSalvati.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import it.epicode.SaporiSalvati.model.User;
+import it.epicode.SaporiSalvati.service.UserService;
 
 @RestController
 @RequestMapping("/api/auth")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
+    AuthenticationManager authenticationManager;
 
     @Autowired
-    private JwtUtil jwtUtil;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private UserRepository userRepository;
+    JwtUtil jwtUtils;
 
     @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody Map<String, String> user) {
-        String username = user.get("username");
-        String password = passwordEncoder.encode(user.get("password"));
-        if (userRepository.findByUsername(username).isPresent()) {
-            return ResponseEntity.badRequest().body("Username già esistente");
-        }
-        User newUser = new User();
-        newUser.setUsername(username);
-        newUser.setPassword(password);
-        userRepository.save(newUser);
-        return ResponseEntity.ok("Registrazione completata");
-    }
+    private UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> user) {
-        String username = user.get("username");
-        String password = user.get("password");
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
-        String token = jwtUtil.generateToken(username);
-        return ResponseEntity.ok(Map.of("token", token, "username", username));
+    public ResponseEntity<?> login(@RequestBody User user) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+
+        return ResponseEntity.ok(jwt);
     }
 
-    @GetMapping("/users/me")
-    public ResponseEntity<User> getCurrentUser() {
-        String username = ((UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getUsername();
-        User user = UserService.getUserByUsername(username);
-        return ResponseEntity.ok(user);
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User user) {
+
+        try {
+            User newUser = userService.registerUser(user);
+
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword())
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            String jwt = jwtUtils.generateJwtToken(authentication);
+
+            return ResponseEntity.ok(new JwtResponse(jwt));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Username già esistente.");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Errore durante la registrazione.");
+        }
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        User user = userService.getUserByUsername(username);
+        return ResponseEntity.ok(new UserDTO(user.getUsername()));
+    }
+
+    public record UserDTO(String username) {}
 }

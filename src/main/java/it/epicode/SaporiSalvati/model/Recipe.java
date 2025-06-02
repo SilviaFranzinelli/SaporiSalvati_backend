@@ -3,32 +3,60 @@ package it.epicode.SaporiSalvati.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
+
+
 @Entity
 @Table(name = "recipes")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-
 public class Recipe {
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
 
+    @Getter
+    @Setter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
+    @Setter
     private String title;
 
-    @Lob
+    @Getter
+    @Setter
+    private String description;
+
+    @Getter
+    @Setter
+    private String imageUrl;
+
+    @Getter
+    @Setter
     private String ingredients;
 
-    @Lob
+    @Getter
+    @Setter
     private String instructions;
 
+    @Getter
+    @Setter
     private String category;
 
-    private boolean favorite;
+    @Getter
+    @Setter
+    public boolean favorite;
 
-    private String imageUrl;
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    @Getter
+    @Setter
+    private User user;
+
+
+    @ManyToMany(mappedBy = "favoriteRecipes")
+    private Set<User> usersWhoFavorited = new HashSet<>();
+
+
+
 }
+

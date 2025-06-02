@@ -1,77 +1,67 @@
 package it.epicode.SaporiSalvati.controller;
 
-import it.epicode.SaporiSalvati.model.Recipe;
-import it.epicode.SaporiSalvati.repository.UserRepository;
-import it.epicode.SaporiSalvati.service.RecipeService;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+import it.epicode.SaporiSalvati.model.Recipe;
+import it.epicode.SaporiSalvati.model.User;
+import it.epicode.SaporiSalvati.service.RecipeService;
+import it.epicode.SaporiSalvati.service.UserService;
 
-import java.util.List;
-
-@CrossOrigin(origins = "http://localhost:3000")
 @RestController
-@RequestMapping("/api/recipes")
+@RequestMapping("/api/user/recipes")
+@CrossOrigin(origins = "http://localhost:5173")
 public class RecipeController {
 
     @Autowired
     private RecipeService recipeService;
 
-    private String getCurrentUsername() { // Metodo helper
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
-            throw new SecurityException("User not authenticated");
-        }
-        return ((UserDetails) authentication.getPrincipal()).getUsername();
+    @Autowired
+    private UserService userService;
+
+    @GetMapping("/api/recipes/user")
+    public List<Recipe> getUserRecipes() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
+
+        User user = userService.getUserByUsername(username);
+        return user.getRecipes();
     }
 
-    @PostMapping
+    @PostMapping("/api/recipes/user")
     public ResponseEntity<Recipe> addRecipe(@RequestBody Recipe recipe) {
-        String username = getCurrentUsername();
-        return ResponseEntity.ok(recipeService.saveRecipe(recipe));
-    }
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String username = auth.getName();
 
-    @GetMapping
-    public ResponseEntity<List<Recipe>> getAllRecipes() {
-        String username = getCurrentUsername();
-        return ResponseEntity.ok(recipeService.getRecipesByUser(username));
-    }
+        User user = userService.getUserByUsername(username);
+        recipe.setUser(user);
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Recipe> getRecipeById(@PathVariable Long id) {
-        return recipeService.getRecipeById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        Recipe savedRecipe = recipeService.saveRecipe(recipe);
+        return ResponseEntity.ok(savedRecipe);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Recipe> updateRecipe(@PathVariable Long id, @RequestBody Recipe updatedRecipe) {
-        return recipeService.getRecipeById(id)
-                .map(recipe -> {
-                    recipe.setTitle(updatedRecipe.getTitle());
-                    recipe.setIngredients(updatedRecipe.getIngredients());
-                    recipe.setInstructions(updatedRecipe.getInstructions());
-                    recipe.setCategory(updatedRecipe.getCategory());
-                    recipe.setImageUrl(updatedRecipe.getImageUrl());
-                    return ResponseEntity.ok(recipeService.saveRecipe(recipe));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Recipe> updateRecipe(@PathVariable Long id, @RequestBody Recipe recipe) {
+        Recipe updatedRecipe = recipeService.updateRecipe(id, recipe);
+        return ResponseEntity.ok(updatedRecipe);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRecipe(@PathVariable Long id) {
-        recipeService.deleteRecipe(id, getCurrentUsername());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/{id}/favorite")
-    public ResponseEntity<Recipe> toggleFavorite(@PathVariable Long id) {
-        Recipe recipe = recipeService.toggleFavorite(id, getCurrentUsername());
-        if (recipe != null) {
-            return ResponseEntity.ok(recipe);
-        }
-        return ResponseEntity.notFound().build();
+    public ResponseEntity<String> deleteRecipe(@PathVariable Long id) {
+        recipeService.deleteRecipe(id);
+        return ResponseEntity.ok("Ricetta eliminata");
     }
 }

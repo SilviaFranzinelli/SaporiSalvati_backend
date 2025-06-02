@@ -20,20 +20,20 @@ public class ParsingController {
             Document doc = Jsoup.connect(url).get();
             Recipe recipe = new Recipe();
 
-            if (url.contains("giallozafferano.it")) {
-                recipe.setTitle(String.valueOf(doc.select("h1").first()));
+            if (url.contains("ricette.giallozafferano.it")) {
+                recipe.setTitle(doc.select("h1").text());
                 recipe.setIngredients(doc.select(".ingredienti, .gz-ingredient-list, .gz-ingredients-list").text());
                 recipe.setInstructions(doc.select(".gz-steps-list, .preparazione, .gz-steps, .gz-preparation-steps").text());
                 recipe.setImageUrl(Objects.requireNonNull(doc.select("img").first()).attr("src"));
                 recipe.setCategory("Giallo Zafferano");
             } else if (url.contains("cucchiaio.it")) {
-                recipe.setTitle(String.valueOf(doc.select("h1").first()));
+                recipe.setTitle(doc.select("h1").text());
                 recipe.setIngredients(doc.select(".ingredienti, .scheda-ingredienti").text());
                 recipe.setInstructions(doc.select(".preparazione, .scheda-preparazione").text());
                 recipe.setImageUrl(Objects.requireNonNull(doc.select("img").first()).attr("src"));
                 recipe.setCategory("Cucchiaio d'Argento");
             } else if (url.contains("fattoincasadabenedetta.it")) {
-                recipe.setTitle(String.valueOf(doc.select("h1").first()));
+                recipe.setTitle(doc.select("h1").text());
                 recipe.setIngredients(doc.select(".ingredienti, .ingredients-list").text());
                 recipe.setInstructions(doc.select(".preparazione, .instructions").text());
                 recipe.setImageUrl(Objects.requireNonNull(doc.select("img").first()).attr("src"));
