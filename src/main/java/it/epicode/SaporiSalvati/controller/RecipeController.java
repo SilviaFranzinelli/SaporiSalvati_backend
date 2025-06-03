@@ -23,7 +23,6 @@ import it.epicode.SaporiSalvati.service.UserService;
 
 @RestController
 @RequestMapping("/api/user/recipes")
-@CrossOrigin(origins = "http://localhost:5173")
 public class RecipeController {
 
     @Autowired

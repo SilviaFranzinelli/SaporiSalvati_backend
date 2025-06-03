@@ -22,7 +22,6 @@ import it.epicode.SaporiSalvati.service.UserService;
 
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
     @Autowired

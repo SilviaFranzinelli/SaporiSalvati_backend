@@ -7,7 +7,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.sql.RowSet;
 import java.security.Key;
 import java.util.Date;
 import java.util.function.Function;
