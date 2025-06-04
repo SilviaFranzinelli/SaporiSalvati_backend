@@ -31,7 +31,7 @@ public class RecipeController {
     @Autowired
     private UserService userService;
 
-    @GetMapping("/api/recipes/user")
+    @GetMapping("/myrecipes")
     public List<Recipe> getUserRecipes() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
@@ -40,7 +40,7 @@ public class RecipeController {
         return user.getRecipes();
     }
 
-    @PostMapping("/api/recipes/user")
+    @PostMapping("/addmyrecipes")
     public ResponseEntity<Recipe> addRecipe(@RequestBody Recipe recipe) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = auth.getName();
