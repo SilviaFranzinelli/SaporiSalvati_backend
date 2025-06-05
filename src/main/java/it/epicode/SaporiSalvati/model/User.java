@@ -60,12 +60,12 @@ public class User implements UserDetails {
     }
 
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @Getter
     @Setter
     private List<Recipe> recipes = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "favorites",
             joinColumns = @JoinColumn(name = "user_id"),

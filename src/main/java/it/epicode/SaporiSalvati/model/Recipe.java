@@ -1,5 +1,6 @@
 package it.epicode.SaporiSalvati.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.HashSet;
@@ -47,6 +48,7 @@ public class Recipe {
     @JoinColumn(name = "user_id", nullable = false)
     @Getter
     @Setter
+    @JsonIgnore
     private User user;
 
 
