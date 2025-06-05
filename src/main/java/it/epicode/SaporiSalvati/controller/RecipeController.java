@@ -40,6 +40,13 @@ public class RecipeController {
         return user.getRecipes();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Recipe> getRecipeById(@PathVariable Long id) {
+        Recipe recipe = recipeService.getRecipeById(id);
+        return ResponseEntity.ok(recipe);
+    }
+
+
     @PostMapping("/addmyrecipes")
     public ResponseEntity<Recipe> addRecipe(@RequestBody Recipe recipe) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

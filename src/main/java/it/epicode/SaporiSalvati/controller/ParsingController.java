@@ -33,19 +33,19 @@ public class ParsingController {
                 recipe.setIngredients(doc.select(".gz-ingredient").text());
                 recipe.setInstructions(doc.select(".gz-content-recipe-step p").text());
                 recipe.setImageUrl(Objects.requireNonNull(doc.select(".gz-featured-image").first()).attr("src"));
-                recipe.setCategory("Giallo Zafferano");
+
             } else if (url.contains("cucchiaio.it")) {
                 recipe.setTitle(doc.select("h1").text());
                 recipe.setIngredients(doc.select("ul li").text());
                 recipe.setInstructions(doc.select("div.recipe_procedures.section div.mb-f30 p").text());
                 recipe.setImageUrl(Objects.requireNonNull(doc.select("picture img").first()).attr("src"));
-                recipe.setCategory("Cucchiaio d'Argento");
+
             } else if (url.contains("fattoincasadabenedetta.it")) {
                 recipe.setTitle(doc.select("h1").text());
                 recipe.setIngredients(doc.select(".content group ul li").text());
                 recipe.setInstructions(doc.select(".recipe-main-section recipe-section steps step content p").text());
                 recipe.setImageUrl(Objects.requireNonNull(doc.select("img").first()).attr("src"));
-                recipe.setCategory("Fatto in casa da Benedetta");
+
             } else {
                 return ResponseEntity.badRequest().body(null);
             }
