@@ -26,25 +26,24 @@ public class Recipe {
 
     @Getter
     @Setter
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
     @Getter
     @Setter
+    @Column(columnDefinition = "TEXT")
     private String ingredients;
 
     @Getter
     @Setter
+    @Column(columnDefinition = "TEXT")
     private String instructions;
 
     @Getter
     @Setter
     private String category;
 
-    @Getter
-    @Setter
-    public boolean favorite;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @Getter
     @Setter
@@ -53,6 +52,7 @@ public class Recipe {
 
 
     @ManyToMany(mappedBy = "favoriteRecipes")
+    @JsonIgnore
     private Set<User> usersWhoFavorited = new HashSet<>();
 
 
