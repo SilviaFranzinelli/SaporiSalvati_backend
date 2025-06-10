@@ -43,6 +43,7 @@ public class Recipe {
     @Setter
     private String category;
 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     @Getter
